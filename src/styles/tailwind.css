@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+@layer base {
+    @import url("https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800;900&display=swap");
+
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 0 0% 0%;
+        --primary: 51 100% 50%;
+        --secondary: 0 0% 0%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 0%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 0%;
+        --primary-foreground: 0 0% 0%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 96%;
+        --muted-foreground: 0 0% 40%;
+        --accent: 51 100% 50%;
+        --accent-foreground: 0 0% 0%;
+        --destructive: 0 70% 64%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 0%;
+        --input: 0 0% 0%;
+        --ring: 51 100% 50%;
+        --radius: 0px;
+    }
+}
+
+@theme {
+    --color-welding-yellow: #ffd700;
+    --color-welding-black: #000000;
+    --color-welding-white: #ffffff;
+    --color-welding-dark-gray: #1a1a1a;
+    --color-welding-medium-gray: #333333;
+    --color-welding-light-gray: #f5f5f5;
+
+    --color-yellow-DEFAULT: #ffd700;
+
+    --font-kanit: "Kanit", sans-serif;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-white text-black;
+        font-family: var(--font-kanit);
+        font-weight: 500;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-kanit);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 900;
+    }
+    h2 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+    }
+    h3 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 700;
+    }
+
+    p {
+        font-family: var(--font-kanit);
+        font-size: clamp(0.9rem, 1.5vw, 1.125rem);
+        font-weight: 400;
+    }
+}
+
+@layer utilities {
+    .parallax-bg {
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+    }
+
+    @media (max-width: 768px) {
+        .parallax-bg {
+            background-attachment: scroll;
+        }
+    }
+
+    .btn-primary {
+        @apply bg-welding-yellow text-welding-black border-3 border-welding-black py-4 px-8 transition-all duration-200;
+        font-family: var(--font-kanit);
+        font-weight: 700;
+        text-transform: uppercase;
+        box-shadow: 4px 4px 0 #000;
+    }
+
+    .btn-primary:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 #000;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-up {
+        animation: fadeUp 0.6s ease forwards;
+    }
+
+    .pattern-stripes {
+        background: repeating-linear-gradient(
+            45deg,
+            #000,
+            #000 10px,
+            #ffd700 10px,
+            #ffd700 20px
+        );
+    }
+}
