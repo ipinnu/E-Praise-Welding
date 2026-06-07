@@ -181,24 +181,49 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Visual block — yellow/white stats */}
+          {/* Founder image + stats */}
           <div className="reveal-on-scroll delay-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-black border-2 border-white/20 p-8 flex flex-col justify-between h-48">
-                <span className="font-kanit font-black text-white text-5xl leading-none">
-                  100+
+            <div
+              className="relative border-2 border-black overflow-hidden mx-auto"
+              style={{ height: "400px", aspectRatio: "771 / 1080", maxWidth: "100%" }}
+            >
+              <img
+                src="/assets/Founder.jpeg"
+                alt="Emmanuel Praise, Founder of E-Praise Welding"
+                className="absolute inset-0 w-full h-full object-cover object-top"
+              />
+              {/* Subtle dark gradient at bottom so the nameplate reads clearly */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+              {/* Yellow accent corner */}
+              <div
+                className="absolute top-0 left-0 w-20 h-20 bg-yellow-DEFAULT opacity-90"
+                style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+              />
+              <span className="absolute top-3 left-3 font-kanit font-black text-black text-xs uppercase tracking-widest">
+                Est. 2017
+              </span>
+              {/* Name plate */}
+              <div className="absolute bottom-0 left-0 right-0 px-6 py-5">
+                <span className="font-kanit font-black text-white text-lg uppercase tracking-wider block leading-none">
+                  Emmanuel Praise
                 </span>
-                <span className="font-kanit font-medium text-white/60 text-sm uppercase tracking-widest">
-                  Projects Done
+                <span className="font-kanit text-yellow-DEFAULT text-xs uppercase tracking-widest">
+                  Founder &amp; Lead Craftsman
                 </span>
               </div>
-              <div className="bg-white border-2 border-black p-8 flex flex-col justify-between h-48">
-                <span className="font-kanit font-black text-black text-5xl leading-none">
-                  10+
-                </span>
-                <span className="font-kanit font-medium text-black/60 text-sm uppercase tracking-widest">
-                  Years Active
-                </span>
+            </div>
+            {/* Stats strip below photo */}
+            <div
+              className="grid grid-cols-2 border-x-2 border-b-2 border-black mx-auto"
+              style={{ width: "100%", maxWidth: "calc(400px * 771 / 1080)" }}
+            >
+              <div className="bg-black px-5 py-4 flex flex-col gap-1 border-r-2 border-black">
+                <span className="font-kanit font-black text-yellow-DEFAULT text-3xl leading-none">100+</span>
+                <span className="font-kanit text-white/50 text-xs uppercase tracking-widest">Projects</span>
+              </div>
+              <div className="bg-white px-5 py-4 flex flex-col gap-1">
+                <span className="font-kanit font-black text-black text-3xl leading-none">5+</span>
+                <span className="font-kanit text-black/40 text-xs uppercase tracking-widest">Years Active</span>
               </div>
             </div>
           </div>

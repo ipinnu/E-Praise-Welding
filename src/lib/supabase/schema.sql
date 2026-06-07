@@ -145,7 +145,8 @@ insert into gallery_items (title, description, image_path, category, size, order
   ('Custom Work 17', 'Ornamental gate design', 'IMG_0897.WEBP', 'Ornamental', 'medium', 24),
   ('Custom Work 18', 'Custom metalwork', 'IMG_0865.JPG.jpeg', 'Fabrication', 'large', 25),
   ('Custom Work 19', 'Steel structure', 'IMG_0853.JPG.jpeg', 'Structural', 'medium', 26),
-  ('Custom Work 20', 'Welded sculpture', 'IMG_0867.JPG.jpeg', 'Sculpture', 'small', 27)
+  ('Custom Work 20', 'Welded sculpture', 'IMG_0867.JPG.jpeg', 'Sculpture', 'small', 27),
+  ('Water Tank Structure', 'Custom steel water tank support structure — engineered for load-bearing strength and weather resistance', 'Water tank structure.jpeg', 'Structural', 'large', 28)
 on conflict do nothing;
 
 -- Storage bucket for chat attachments

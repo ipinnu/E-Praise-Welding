@@ -105,7 +105,7 @@ const services = [
 
 const stats = [
   { value: 100, suffix: "+", label: "Projects Completed" },
-  { value: 10, suffix: "yrs", label: "Years Experience" },
+  { value: 5, suffix: "yrs", label: "Years Experience" },
   { value: 98, suffix: "%", label: "Client Satisfaction" },
 ];
 
@@ -319,7 +319,7 @@ export default function HomePage() {
             >
               <Link
                 href="/services"
-                className="inline-flex items-center gap-2 bg-yellow-DEFAULT text-white font-kanit font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-yellow-DEFAULT shadow-[4px_4px_0_rgba(255,215,0,0.4)] hover:shadow-[2px_2px_0_rgba(255,215,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150"
+                className="inline-flex items-center gap-2 bg-yellow-DEFAULT text-black font-kanit font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-yellow-DEFAULT shadow-[4px_4px_0_rgba(255,215,0,0.4)] hover:shadow-[2px_2px_0_rgba(255,215,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150"
               >
                 Our Services
                 <span className="text-lg">→</span>
@@ -420,22 +420,22 @@ export default function HomePage() {
             </div>
 
             {/* Small card — white */}
-            <div className="reveal-on-scroll delay-1 bento-card bg-white border-2 border-black p-8 min-h-[280px] flex flex-col justify-between group cursor-pointer hover:bg-black hover:text-white transition-colors duration-300">
+            <div className="reveal-on-scroll delay-1 bento-card bg-white border-2 border-black p-8 min-h-[280px] flex flex-col justify-between group cursor-pointer hover:bg-black transition-colors duration-300">
               <div>
-                <span className="font-kanit font-black text-black/10 text-5xl leading-none">
+                <span className="font-kanit font-black text-black/10 group-hover:text-white/20 text-5xl leading-none transition-colors duration-300">
                   02
                 </span>
-                <h3 className="font-kanit font-black text-black text-2xl mt-4 mb-4 uppercase">
+                <h3 className="font-kanit font-black text-black group-hover:text-white text-2xl mt-4 mb-4 uppercase transition-colors duration-300">
                   Custom Fabrication
                 </h3>
-                <p className="font-kanit text-black/60 text-sm">
+                <p className="font-kanit text-black/60 group-hover:text-white/70 text-sm transition-colors duration-300">
                   Gates, railings, frames, and industrial components built to
                   exact specifications.
                 </p>
               </div>
               <Link
                 href="/services"
-                className="font-kanit font-bold text-black text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all duration-200"
+                className="font-kanit font-bold text-black group-hover:text-white text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all duration-200"
               >
                 Learn More <span>→</span>
               </Link>
@@ -466,20 +466,20 @@ export default function HomePage() {
             {/* Large card — white */}
             <div className="reveal-on-scroll delay-3 md:col-span-2 bento-card bg-white border-2 border-black p-8 md:p-12 min-h-[280px] flex flex-col justify-between group cursor-pointer hover:bg-black transition-colors duration-300">
               <div>
-                <span className="font-kanit font-black text-black/10 text-5xl leading-none">
+                <span className="font-kanit font-black text-black/10 group-hover:text-white/20 text-5xl leading-none transition-colors duration-300">
                   04
                 </span>
-                <h3 className="font-kanit font-black text-black text-3xl md:text-4xl mt-4 mb-4 uppercase">
+                <h3 className="font-kanit font-black text-black group-hover:text-white text-3xl md:text-4xl mt-4 mb-4 uppercase transition-colors duration-300">
                   Structural Steel
                 </h3>
-                <p className="font-kanit text-black/60 text-base max-w-md">
+                <p className="font-kanit text-black/60 group-hover:text-white/70 text-base max-w-md transition-colors duration-300">
                   Heavy-duty steel construction for commercial and residential
                   projects. Built to code, built to last decades.
                 </p>
               </div>
               <Link
                 href="/services"
-                className="font-kanit font-bold text-black text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all duration-200"
+                className="font-kanit font-bold text-black group-hover:text-white text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all duration-200"
               >
                 Learn More <span>→</span>
               </Link>

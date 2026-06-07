@@ -5,6 +5,14 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/client";
 import type { Message, Profile } from "@/src/lib/supabase/types";
+import SignaturePad from "@/src/components/portal/SignaturePad";
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  image_path: string;
+  category: string;
+}
 
 export default function ChatPage() {
   return (
@@ -27,15 +35,17 @@ function ChatContent() {
   const [user, setUser] = useState<Profile | null>(null);
   const [adminId, setAdminId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [input, setInput] = useState(contextLabel ? `I'm interested in ${contextLabel}` : "");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [signingMessageId, setSigningMessageId] = useState<string | null>(null);
+  const [submittingSignature, setSubmittingSignature] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load current user + admin ID + messages
   useEffect(() => {
     async function init() {
       const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -57,6 +67,14 @@ function ChatContent() {
       setAdminId(admin.id);
 
       await fetchMessages(authUser.id, admin.id);
+
+      const { data: gItems } = await supabase
+        .from("gallery_items")
+        .select("id, title, image_path, category")
+        .order("order_index", { ascending: true })
+        .limit(16);
+      setGalleryItems(gItems ?? []);
+
       setLoading(false);
     }
     init();
@@ -73,11 +91,9 @@ function ChatContent() {
     setMessages(data ?? []);
   }, [supabase]);
 
-  // Mark messages as read + real-time subscription
   useEffect(() => {
     if (!user || !adminId) return;
 
-    // Mark unread messages from admin as read
     supabase
       .from("messages")
       .update({ read_at: new Date().toISOString() })
@@ -103,12 +119,10 @@ function ChatContent() {
     return () => { supabase.removeChannel(channel); };
   }, [user, adminId, fetchMessages, supabase]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -141,7 +155,6 @@ function ChatContent() {
 
     if (!error && msg) {
       setMessages((prev) => [...prev, msg]);
-      // Notify admin via API
       fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,7 +177,6 @@ function ChatContent() {
 
     setUploading(true);
 
-    // First create the message
     const { data: msg, error: msgError } = await supabase
       .from("messages")
       .insert({
@@ -199,6 +211,35 @@ function ChatContent() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  async function submitSignature(messageId: string, blob: Blob) {
+    if (!user || !adminId) return;
+    setSubmittingSignature(true);
+
+    const fileName = `signature_${Date.now()}.png`;
+    const path = `${messageId}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("chat-attachments")
+      .upload(path, blob, { contentType: "image/png" });
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from("chat-attachments")
+        .getPublicUrl(path);
+
+      await supabase.from("attachments").insert({
+        message_id: messageId,
+        storage_url: publicUrl,
+        file_name: fileName,
+      });
+
+      await fetchMessages(user.id, adminId);
+    }
+
+    setSigningMessageId(null);
+    setSubmittingSignature(false);
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     router.push("/");
@@ -223,171 +264,310 @@ function ChatContent() {
     );
   }
 
+  const panelImages = messages.flatMap((msg) =>
+    (msg.attachments ?? []).filter((att) => /\.(png|jpe?g|gif|webp)$/i.test(att.file_name))
+  );
+
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 md:px-8 py-3 border-b-2 border-black bg-white z-10 shrink-0">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/assets/logo.png" alt="E-Praise Welding" width={36} height={36} />
-          <div className="flex flex-col leading-none">
-            <span className="font-kanit font-black text-sm uppercase tracking-wider text-black">
-              E-Praise
+    <div className="flex h-screen bg-white overflow-hidden">
+
+      {/* ── LEFT: Chat ── */}
+      <div className="flex flex-col flex-1 min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 md:px-8 py-3 border-b-2 border-black bg-white z-10 shrink-0">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/assets/logo.png" alt="E-Praise Welding" width={36} height={36} />
+            <div className="flex flex-col leading-none">
+              <span className="font-kanit font-black text-sm uppercase tracking-wider text-black">
+                E-Praise
+              </span>
+              <span className="font-kanit font-medium text-xs uppercase tracking-widest text-yellow-DEFAULT">
+                Welding
+              </span>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="font-kanit text-black/40 text-xs uppercase tracking-widest hidden sm:block">
+              {user?.full_name || user?.email}
             </span>
-            <span className="font-kanit font-medium text-xs uppercase tracking-widest text-yellow-DEFAULT">
-              Welding
-            </span>
+            <button
+              onClick={signOut}
+              className="font-kanit font-bold text-xs uppercase tracking-widest text-black/50 hover:text-black border-b border-black/20 hover:border-black transition-all duration-150"
+            >
+              Sign Out
+            </button>
           </div>
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="font-kanit text-black/40 text-xs uppercase tracking-widest hidden sm:block">
-            {user?.full_name || user?.email}
-          </span>
-          <button
-            onClick={signOut}
-            className="font-kanit font-bold text-xs uppercase tracking-widest text-black/50 hover:text-black border-b border-black/20 hover:border-black transition-all duration-150"
-          >
-            Sign Out
-          </button>
+        </div>
+
+        {/* Thread */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 flex flex-col gap-4">
+          {messages.length === 0 && (
+            <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 bg-yellow-DEFAULT border-2 border-black flex items-center justify-center mb-6">
+                <span className="font-kanit font-black text-2xl text-black">EP</span>
+              </div>
+              <h3 className="font-kanit font-black text-xl uppercase text-black mb-2">
+                Start a Conversation
+              </h3>
+              <p className="font-kanit text-black/50 text-sm max-w-xs">
+                Describe what you&apos;re looking for and we&apos;ll get back to you.
+              </p>
+              {contextLabel && (
+                <div className="mt-4 inline-flex items-center gap-2 bg-yellow-DEFAULT border-2 border-black px-4 py-2">
+                  <span className="font-kanit font-bold text-xs uppercase tracking-widest text-black">
+                    {contextLabel}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {messages.map((msg) => {
+            const isOwn = msg.sender_id === user?.id;
+            const isQuote = msg.context_label === "QUOTE_REQUEST";
+            const signature = (msg.attachments ?? []).find((a) => a.file_name.startsWith("signature_"));
+
+            // ── Quote / Contract card ──
+            if (isQuote) {
+              return (
+                <div key={msg.id} className="self-start w-full max-w-lg">
+                  <div className="border-2 border-black bg-white shadow-[4px_4px_0_#000]">
+                    {/* Card header */}
+                    <div className="bg-black px-5 py-3 flex items-center justify-between">
+                      <span className="font-kanit font-black text-xs uppercase tracking-widest text-yellow-DEFAULT">
+                        Quote / Contract
+                      </span>
+                      <span className="font-kanit text-xs text-white/40">{formatTime(msg.created_at)}</span>
+                    </div>
+
+                    {/* Quote content */}
+                    <div className="px-5 py-4 border-b-2 border-black">
+                      <p className="font-kanit text-sm text-black leading-relaxed whitespace-pre-wrap">
+                        {msg.content}
+                      </p>
+                    </div>
+
+                    {/* Signature section */}
+                    <div className="px-5 py-4">
+                      {signature ? (
+                        <div>
+                          <span className="font-kanit font-black text-xs uppercase tracking-widest text-black/40 block mb-3">
+                            Signed ✓
+                          </span>
+                          <img
+                            src={signature.storage_url}
+                            alt="Signature"
+                            className="max-h-20 border border-black/10"
+                          />
+                        </div>
+                      ) : signingMessageId === msg.id ? (
+                        <div>
+                          <span className="font-kanit font-black text-xs uppercase tracking-widest text-black/40 block mb-3">
+                            Draw your signature below
+                          </span>
+                          <SignaturePad
+                            onSubmit={(blob) => submitSignature(msg.id, blob)}
+                            onCancel={() => setSigningMessageId(null)}
+                            submitting={submittingSignature}
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setSigningMessageId(msg.id)}
+                          className="w-full font-kanit font-black text-sm uppercase tracking-widest py-3 bg-yellow-DEFAULT text-black border-2 border-black shadow-[3px_3px_0_#000] hover:shadow-[1px_1px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150"
+                        >
+                          Sign This Quote →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // ── Regular message ──
+            return (
+              <div
+                key={msg.id}
+                className={`flex flex-col gap-1 max-w-[75%] ${isOwn ? "self-end items-end" : "self-start items-start"}`}
+              >
+                {msg.context_label && msg.context_label !== "QUOTE_REQUEST" && (
+                  <span className="font-kanit font-bold text-xs uppercase tracking-widest bg-yellow-DEFAULT border border-black px-2 py-0.5 text-black mb-1">
+                    {msg.context_label}
+                  </span>
+                )}
+                <div
+                  className={`px-4 py-3 border-2 border-black ${
+                    isOwn
+                      ? "bg-yellow-DEFAULT text-black shadow-[3px_3px_0_#000]"
+                      : "bg-black text-white shadow-[3px_3px_0_#FFD700]"
+                  }`}
+                >
+                  {msg.attachments && msg.attachments.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {msg.attachments.map((att) => (
+                        <a
+                          key={att.id}
+                          href={att.storage_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex items-center gap-2 text-sm font-kanit font-bold underline ${isOwn ? "text-black" : "text-yellow-DEFAULT"}`}
+                        >
+                          <span className="text-base">📎</span>
+                          {att.file_name}
+                        </a>
+                      ))}
+                      {msg.attachments.map((att) =>
+                        /\.(png|jpe?g|gif|webp)$/i.test(att.file_name) ? (
+                          <Image
+                            key={att.id + "-img"}
+                            src={att.storage_url}
+                            alt={att.file_name}
+                            width={300}
+                            height={200}
+                            className="max-w-full border border-current"
+                            style={{ objectFit: "cover" }}
+                            unoptimized
+                          />
+                        ) : null
+                      )}
+                    </div>
+                  ) : (
+                    <p className="font-kanit text-sm leading-relaxed whitespace-pre-wrap">
+                      {msg.content}
+                    </p>
+                  )}
+                </div>
+                <span className="font-kanit text-black/30 text-xs">{formatTime(msg.created_at)}</span>
+              </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input */}
+        <div className="border-t-2 border-black bg-white px-4 md:px-8 py-4 shrink-0">
+          <form onSubmit={sendMessage} className="flex gap-3 items-end">
+            <div className="flex-1 border-2 border-black focus-within:border-yellow-DEFAULT transition-colors duration-150">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+                rows={1}
+                className="w-full px-4 py-3 font-kanit text-sm resize-none focus:outline-none bg-white placeholder:text-black/30"
+                style={{ minHeight: "48px", maxHeight: "160px" }}
+              />
+            </div>
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              title="Attach image"
+              className="w-12 h-12 border-2 border-black flex items-center justify-center hover:bg-yellow-DEFAULT transition-colors duration-150 disabled:opacity-40 shrink-0"
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span className="text-lg">📎</span>
+              )}
+            </button>
+
+            <button
+              type="submit"
+              disabled={!input.trim() || sending}
+              className="h-12 px-6 bg-yellow-DEFAULT text-black font-kanit font-black text-xs uppercase tracking-widest border-2 border-black shadow-[3px_3px_0_#000] hover:shadow-[1px_1px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 shrink-0"
+            >
+              {sending ? "..." : "Send"}
+            </button>
+          </form>
         </div>
       </div>
 
-      {/* Thread */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 flex flex-col gap-4">
-        {messages.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 bg-yellow-DEFAULT border-2 border-black flex items-center justify-center mb-6">
-              <span className="font-kanit font-black text-2xl text-black">EP</span>
-            </div>
-            <h3 className="font-kanit font-black text-xl uppercase text-black mb-2">
-              Start a Conversation
-            </h3>
-            <p className="font-kanit text-black/50 text-sm max-w-xs">
-              Describe what you&apos;re looking for and we&apos;ll get back to you.
-            </p>
-            {contextLabel && (
-              <div className="mt-4 inline-flex items-center gap-2 bg-yellow-DEFAULT border-2 border-black px-4 py-2">
-                <span className="font-kanit font-bold text-xs uppercase tracking-widest text-black">
-                  {contextLabel}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+      {/* ── RIGHT: Side Panel ── */}
+      <aside className="hidden lg:flex flex-col w-72 border-l-2 border-black bg-white shrink-0">
+        {/* Panel header */}
+        <div className="px-5 py-4 border-b-2 border-black shrink-0">
+          <span className="font-kanit font-semibold text-xs uppercase tracking-widest text-black/40 block mb-0.5">
+            {panelImages.length > 0 ? "This Project" : "Our Work"}
+          </span>
+          <h3 className="font-kanit font-black text-base uppercase text-black">
+            {panelImages.length > 0 ? "Project Files" : "Portfolio"}
+          </h3>
+        </div>
 
-        {messages.map((msg) => {
-          const isOwn = msg.sender_id === user?.id;
-          return (
-            <div
-              key={msg.id}
-              className={`flex flex-col gap-1 max-w-[75%] ${isOwn ? "self-end items-end" : "self-start items-start"}`}
-            >
-              {msg.context_label && (
-                <span className="font-kanit font-bold text-xs uppercase tracking-widest bg-yellow-DEFAULT border border-black px-2 py-0.5 text-black mb-1">
-                  {msg.context_label}
-                </span>
-              )}
-              <div
-                className={`px-4 py-3 border-2 border-black ${
-                  isOwn
-                    ? "bg-yellow-DEFAULT text-black shadow-[3px_3px_0_#000]"
-                    : "bg-black text-white shadow-[3px_3px_0_#FFD700]"
-                }`}
-              >
-                {msg.attachments && msg.attachments.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    {msg.attachments.map((att) => (
-                      <a
-                        key={att.id}
-                        href={att.storage_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center gap-2 text-sm font-kanit font-bold underline ${isOwn ? "text-black" : "text-yellow-DEFAULT"}`}
-                      >
-                        <span className="text-base">📎</span>
-                        {att.file_name}
-                      </a>
-                    ))}
-                    {/* If it's an image, show preview */}
-                    {msg.attachments.map((att) =>
-                      /\.(png|jpe?g|gif|webp)$/i.test(att.file_name) ? (
-                        <Image
-                          key={att.id + "-img"}
-                          src={att.storage_url}
-                          alt={att.file_name}
-                          width={300}
-                          height={200}
-                          className="max-w-full border border-current"
-                          style={{ objectFit: "cover" }}
-                          unoptimized
-                        />
-                      ) : null
-                    )}
+        {/* Panel content */}
+        <div className="flex-1 overflow-y-auto">
+          {panelImages.length > 0 ? (
+            <div className="flex flex-col">
+              {panelImages.map((img) => (
+                <a
+                  key={img.id}
+                  href={img.storage_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group border-b-2 border-black block"
+                >
+                  <div className="relative h-44 overflow-hidden bg-black">
+                    <img
+                      src={img.storage_url}
+                      alt={img.file_name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                   </div>
-                ) : (
-                  <p className="font-kanit text-sm leading-relaxed whitespace-pre-wrap">
-                    {msg.content}
-                  </p>
-                )}
-              </div>
-              <span className="font-kanit text-black/30 text-xs">{formatTime(msg.created_at)}</span>
+                  <div className="px-4 py-2.5 flex items-center gap-2 bg-white group-hover:bg-yellow-DEFAULT transition-colors duration-150">
+                    <span className="font-kanit text-xs text-black/60 truncate flex-1">{img.file_name}</span>
+                    <span className="font-kanit font-bold text-xs text-black/30 group-hover:text-black transition-colors">↗</span>
+                  </div>
+                </a>
+              ))}
             </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+          ) : (
+            <div>
+              <p className="px-5 pt-4 pb-3 font-kanit text-xs text-black/40 leading-relaxed">
+                Browse our past work for inspiration — tap any piece to inquire.
+              </p>
+              <div className="grid grid-cols-2">
+                {galleryItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/portal/chat?context=${encodeURIComponent("Gallery: " + item.title)}`}
+                    className="group relative overflow-hidden border-b border-r border-black/10 block bg-black"
+                    style={{ height: "112px" }}
+                  >
+                    <img
+                      src={`/assets/${item.image_path}`}
+                      alt={item.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-colors duration-200 flex items-end p-2">
+                      <span className="font-kanit font-bold text-white text-xs uppercase leading-tight opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {item.title}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </aside>
 
-      {/* Input */}
-      <div className="border-t-2 border-black bg-white px-4 md:px-8 py-4 shrink-0">
-        <form onSubmit={sendMessage} className="flex gap-3 items-end">
-          <div className="flex-1 border-2 border-black focus-within:border-yellow-DEFAULT transition-colors duration-150">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
-              rows={1}
-              className="w-full px-4 py-3 font-kanit text-sm resize-none focus:outline-none bg-white placeholder:text-black/30"
-              style={{ minHeight: "48px", maxHeight: "160px" }}
-            />
-          </div>
-
-          {/* Attach file */}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*,.pdf"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            title="Attach image"
-            className="w-12 h-12 border-2 border-black flex items-center justify-center hover:bg-yellow-DEFAULT transition-colors duration-150 disabled:opacity-40 shrink-0"
-          >
-            {uploading ? (
-              <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <span className="text-lg">📎</span>
-            )}
-          </button>
-
-          <button
-            type="submit"
-            disabled={!input.trim() || sending}
-            className="h-12 px-6 bg-yellow-DEFAULT text-black font-kanit font-black text-xs uppercase tracking-widest border-2 border-black shadow-[3px_3px_0_#000] hover:shadow-[1px_1px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 shrink-0"
-          >
-            {sending ? "..." : "Send"}
-          </button>
-        </form>
-      </div>
     </div>
   );
 }
