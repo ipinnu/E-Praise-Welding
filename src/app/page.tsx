@@ -1,5 +1,5 @@
 ﻿"use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react"; // useState kept for Counter component
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/src/components/Header";
@@ -112,25 +112,27 @@ const stats = [
 
 export default function HomePage() {
   useScrollReveal();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleMouse = (e: MouseEvent) => {
-      setMousePos({
-        x: e.clientX / window.innerWidth - 0.5,
-        y: e.clientY / window.innerHeight - 0.5,
-      });
+    const handleScroll = () => {
+      if (videoRef.current)
+        videoRef.current.style.transform = `translateY(${window.scrollY * 0.3}px)`;
     };
+    const handleMouse = (e: MouseEvent) => {
+      if (gridRef.current) {
+        const x = e.clientX / window.innerWidth - 0.5;
+        const y = e.clientY / window.innerHeight - 0.5;
+        gridRef.current.style.transform = `translate(${x * 20}px, ${y * 20}px)`;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("mousemove", handleMouse);
-    return () => window.removeEventListener("mousemove", handleMouse);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouse);
+    };
   }, []);
 
   return (
@@ -234,22 +236,17 @@ export default function HomePage() {
 
       <Header />
 
-      {/* â"€â"€ HERO â"€â"€ (kept dark for video contrast — counts as black 10% anchor) */}
-      <section
-        ref={heroRef}
-        className="relative h-screen min-h-[600px] overflow-hidden bg-black"
-      >
+      {/* â"€â"€ HERO â"€â"€ */}
+      <section className="relative h-screen min-h-[600px] overflow-hidden bg-black">
         {/* Background video */}
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-80"
-          style={{
-            transform: `translateY(${scrollY * 0.3}px)`,
-            filter: "blur(2px) brightness(1.1) saturate(1.2)",
-          }}
+          style={{ filter: "blur(2px) brightness(1.1) saturate(1.2)" }}
         >
           <source src="/assets/hero-video.mp4" type="video/mp4" />
         </video>
@@ -262,12 +259,12 @@ export default function HomePage() {
 
         {/* Animated grid lines */}
         <div
+          ref={gridRef}
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,215,0,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,215,0,0.5) 1px, transparent 1px)",
             backgroundSize: "80px 80px",
-            transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
             transition: "transform 0.3s ease",
           }}
         />

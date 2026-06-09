@@ -1,6 +1,14 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
+import { Kanit } from "next/font/google";
 import "../styles/tailwind.css";
+
+const kanit = Kanit({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-kanit",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -23,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={kanit.variable}>
         {children}
 
         <script
