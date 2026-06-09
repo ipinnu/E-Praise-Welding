@@ -23,7 +23,7 @@ export default function SignaturePad({ onSubmit, onCancel, submitting }: Signatu
     ctx.lineJoin = "round";
   }, []);
 
-  function getPos(e: MouseEvent | Touch, canvas: HTMLCanvasElement) {
+  function getPos(e: { clientX: number; clientY: number }, canvas: HTMLCanvasElement) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
