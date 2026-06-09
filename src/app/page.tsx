@@ -212,6 +212,23 @@ export default function HomePage() {
         .parallax-text {
           will-change: transform;
         }
+
+        .yellow-depth {
+          background: linear-gradient(
+            160deg,
+            #FFF176 0%,
+            #FFD700 22%,
+            #D07800 50%,
+            #FFD700 75%,
+            #FFF176 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter:
+            drop-shadow(2px 5px 0px rgba(0, 0, 0, 0.55))
+            drop-shadow(0px 0px 16px rgba(255, 180, 0, 0.22));
+        }
       `}</style>
 
       <Header />
@@ -233,7 +250,7 @@ export default function HomePage() {
             filter: "blur(2px) brightness(1.1) saturate(1.2)",
           }}
         >
-          <source src="/assets/Hero welding_2.mp4" type="video/mp4" />
+          <source src="/assets/hero-video.mp4" type="video/mp4" />
         </video>
 
         {/* Dark gradient overlay — top and bottom fade */}
@@ -358,7 +375,7 @@ export default function HomePage() {
                   : ""
               }`}
             >
-              <div className="font-kanit font-black text-7xl md:text-8xl text-yellow-DEFAULT leading-none mb-3">
+              <div className="yellow-depth font-kanit font-black text-7xl md:text-8xl leading-none mb-3">
                 <Counter target={stat.value} suffix={stat.suffix} />
               </div>
               <div className="font-kanit font-semibold text-black text-xs uppercase tracking-[0.2em]">
@@ -578,54 +595,51 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               {
-                bg: "bg-black",
+                img: "Gate.jpeg",
                 span: "md:col-span-2 md:row-span-2",
                 h: "h-64 md:h-auto",
                 label: "Custom Gate Installation",
               },
               {
-                bg: "bg-white border-2 border-black",
+                img: "Aesthetic%20pieces.WEBP",
                 span: "",
                 h: "h-48",
                 label: "Steel Sculpture",
               },
               {
-                bg: "bg-black",
+                img: "Metal%20design%20front%20entrance.WEBP",
                 span: "",
                 h: "h-48",
                 label: "Ornamental Railing",
               },
               {
-                bg: "bg-white border-2 border-black",
+                img: "Water%20tank%20structure.jpeg",
                 span: "",
                 h: "h-48",
                 label: "Industrial Frame",
               },
               {
-                bg: "bg-black",
+                img: "Wardrobe.PNG",
                 span: "",
                 h: "h-48",
-                label: "Architectural Panel",
+                label: "Wardrobe Frame",
               },
-            ]?.map((item, i) => (
+            ].map((item, i) => (
               <div
                 key={i}
-                className={`reveal-on-scroll delay-${i + 1} ${item.span} ${item.bg} ${item.h} border-2 border-black relative overflow-hidden group cursor-pointer`}
+                className={`reveal-on-scroll delay-${i + 1} ${item.span} ${item.h} border-2 border-black relative overflow-hidden group cursor-pointer bg-black`}
               >
-                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                <img
+                  src={`/assets/${item.img}`}
+                  alt={item.label}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/20" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                   <span className="font-kanit font-bold text-white text-sm uppercase tracking-wider">
                     {item.label}
                   </span>
                 </div>
-                {/* Placeholder pattern */}
-                <div
-                  className="absolute inset-0 opacity-5"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(45deg, #000, #000 2px, transparent 2px, transparent 20px)",
-                  }}
-                />
               </div>
             ))}
           </div>
@@ -665,7 +679,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/services"
-              className="inline-flex items-center justify-center gap-2 text-black font-kanit font-bold text-sm uppercase tracking-widest border-b-2 border-black pb-1 hover:border-black/60 transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 text-white font-kanit font-bold text-sm uppercase tracking-widest border-b-2 border-white/60 pb-1 hover:border-yellow-DEFAULT hover:text-yellow-DEFAULT transition-all duration-200"
             >
               Explore Services
             </Link>
