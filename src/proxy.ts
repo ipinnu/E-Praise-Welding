@@ -42,8 +42,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLoginPage && user) {
+    const next = request.nextUrl.searchParams.get("next");
     const url = request.nextUrl.clone();
-    url.pathname = "/portal/chat";
+    url.pathname = next && next.startsWith("/portal") ? next : "/portal";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

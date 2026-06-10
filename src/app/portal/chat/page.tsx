@@ -56,6 +56,7 @@ function ChatContent() {
         .select("*")
         .eq("id", authUser.id)
         .single();
+      if (profile?.role === "admin") { router.push("/portal/admin"); return; }
       setUser(profile);
 
       const { data: admin } = await supabase
