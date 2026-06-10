@@ -245,8 +245,8 @@ export default function HomePage() {
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-80"
-          style={{ filter: "blur(2px) brightness(1.1) saturate(1.2)" }}
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+          style={{ willChange: "transform" }}
         >
           <source src="/assets/hero-video.mp4" type="video/mp4" />
         </video>

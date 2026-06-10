@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw/source videos (only compressed hero-video.mp4 should be committed)
+public/assets/V3.mp4
+public/assets/New\ Hero\ V.2.mp4
+public/assets/new\ hero\ video.mp4
+public/assets/Hero\ welding_2.mp4
+public/assets/Wardrobe\ video.MP4
+public/assets/WhatsApp\ Video*.mp4
