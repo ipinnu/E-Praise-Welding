@@ -82,12 +82,6 @@ export default function GalleryPage() {
       ? items
       : items.filter((item) => item.category === activeCategory);
 
-  const getHeight = (size: string) => {
-    if (size === "large") return "h-80 md:h-96";
-    if (size === "medium") return "h-64 md:h-72";
-    return "h-48 md:h-56";
-  };
-
   const handleWantThis = (item: GalleryItem) => {
     if (isLoggedIn) {
       router.push(
@@ -246,15 +240,15 @@ export default function GalleryPage() {
                     if (el) itemRefs.current.set(item.id, el);
                   }}
                   data-id={item.id}
-                  className={`gallery-item break-inside-avoid ${visibleItems.has(item.id) ? "visible" : ""} ${getHeight(item.size)} border-2 border-black relative overflow-hidden group cursor-pointer bg-black`}
+                  className={`gallery-item break-inside-avoid ${visibleItems.has(item.id) ? "visible" : ""} border-2 border-black relative overflow-hidden group cursor-pointer bg-black`}
                   style={{ transitionDelay: `${(i % 6) * 0.08}s` }}
                   onClick={() => handleWantThis(item)}
                 >
-                  {/* Real image */}
+                  {/* Real image — natural proportions */}
                   <img
                     src={`/assets/${encodeURIComponent(item.image_path)}`}
                     alt={item.title}
-                    className="gallery-img absolute inset-0 w-full h-full object-cover"
+                    className="gallery-img w-full h-auto block"
                   />
 
                   {/* Dark scrim so category badge is readable */}
