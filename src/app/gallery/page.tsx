@@ -240,15 +240,19 @@ export default function GalleryPage() {
                     if (el) itemRefs.current.set(item.id, el);
                   }}
                   data-id={item.id}
-                  className={`gallery-item break-inside-avoid ${visibleItems.has(item.id) ? "visible" : ""} border-2 border-black relative overflow-hidden group cursor-pointer bg-black`}
+                  className="gallery-item break-inside-avoid border-2 border-black relative overflow-hidden group cursor-pointer bg-black"
                   style={{ transitionDelay: `${(i % 6) * 0.08}s` }}
                   onClick={() => handleWantThis(item)}
                 >
-                  {/* Real image — natural proportions */}
+                  {/* Real image — natural proportions, visible on load */}
                   <img
                     src={`/assets/${encodeURIComponent(item.image_path)}`}
                     alt={item.title}
                     className="gallery-img w-full h-auto block"
+                    onLoad={(e) => {
+                      const card = (e.target as HTMLImageElement).closest(".gallery-item");
+                      card?.classList.add("visible");
+                    }}
                   />
 
                   {/* Dark scrim so category badge is readable */}
