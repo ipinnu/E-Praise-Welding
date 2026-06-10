@@ -219,18 +219,16 @@ export default function HomePage() {
         .yellow-depth {
           background: linear-gradient(
             160deg,
-            #FFF176 0%,
-            #FFD700 22%,
-            #D07800 50%,
-            #FFD700 75%,
-            #FFF176 100%
+            #FFFDE7 0%,
+            #FFD700 35%,
+            #FFD700 65%,
+            #FFFDE7 100%
           );
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
           filter:
-            drop-shadow(2px 5px 0px rgba(0, 0, 0, 0.55))
-            drop-shadow(0px 0px 16px rgba(255, 180, 0, 0.22));
+            drop-shadow(2px 4px 0px rgba(0, 0, 0, 0.5));
         }
       `}</style>
 
