@@ -20,7 +20,11 @@ export const metadata: Metadata = {
   description:
     "E-Praise Welding delivers expert metal welding, custom fabrication, and bespoke sculpture design for contractors, architects, and homeowners across the region.",
   icons: {
-    icon: [{ url: "/favicon.ico", type: "image/x-icon" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-192.png" }],
   },
 };
 
