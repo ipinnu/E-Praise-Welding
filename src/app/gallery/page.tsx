@@ -5,16 +5,11 @@ import { useRouter } from "next/navigation";
 import Header from "@/src/components/Header";
 import Footer from "@/src/components/Footer";
 import { createClient } from "@/src/lib/supabase/client";
-
-interface GalleryItem {
-  id: string;
-  title: string;
-  description: string;
-  image_path: string;
-  category: string;
-  size: "large" | "medium" | "small";
-  order_index: number;
-}
+import {
+  getGalleryImageUrl,
+  getGalleryLayoutClasses,
+  type GalleryItem,
+} from "@/src/lib/gallery";
 
 const categories = [
   "All",
@@ -49,7 +44,12 @@ export default function GalleryPage() {
           console.error("Gallery fetch error:", error);
           setFetchError(error.message);
         } else {
-          setItems((data ?? []) as GalleryItem[]);
+          setItems(
+            (data ?? []).map((item) => ({
+              ...item,
+              orientation: item.orientation ?? "portrait",
+            })) as GalleryItem[],
+          );
         }
         setLoading(false);
       });
@@ -232,7 +232,7 @@ export default function GalleryPage() {
               <p className="font-kanit text-black/40 text-xs">{fetchError}</p>
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((item, i) => (
                 <div
                   key={`${item.id}-${activeCategory}`}
@@ -240,17 +240,18 @@ export default function GalleryPage() {
                     if (el) itemRefs.current.set(item.id, el);
                   }}
                   data-id={item.id}
-                  className="gallery-item break-inside-avoid border-2 border-black relative overflow-hidden group cursor-pointer bg-black"
+                  className={`gallery-item border-2 border-black relative overflow-hidden group cursor-pointer bg-black ${getGalleryLayoutClasses(item.orientation)}`}
                   style={{ transitionDelay: `${(i % 6) * 0.08}s` }}
                   onClick={() => handleWantThis(item)}
                 >
-                  {/* Real image — natural proportions, visible on load */}
                   <img
-                    src={`/assets/${encodeURIComponent(item.image_path)}`}
+                    src={getGalleryImageUrl(item.image_path)}
                     alt={item.title}
-                    className="gallery-img w-full h-auto block"
+                    className="gallery-img w-full h-full object-cover"
                     onLoad={(e) => {
-                      const card = (e.target as HTMLImageElement).closest(".gallery-item");
+                      const card = (e.target as HTMLImageElement).closest(
+                        ".gallery-item",
+                      );
                       card?.classList.add("visible");
                     }}
                   />

@@ -3,8 +3,14 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/src/components/Header";
 import Footer from "@/src/components/Footer";
-import Image from "next/image";
 import Link from "next/link";
+import {
+  contactEmail,
+  contactHours,
+  contactPhoneDisplay,
+  contactPhoneE164,
+  whatsappUrl,
+} from "@/src/lib/contact";
 
 function useScrollReveal() {
   useEffect(() => {
@@ -370,8 +376,9 @@ export default function ContactPage() {
               animation: "slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both",
             }}
           >
-            Ready to start your project? Get in touch for a free consultation
-            and detailed quote. We respond within 24 hours.
+            Ready to start your welding or fabrication project in Nigeria? Get
+            in touch for a free consultation and detailed quote. We respond
+            within 24 hours.
           </p>
         </div>
       </section>
@@ -388,32 +395,61 @@ export default function ContactPage() {
             <div className="space-y-8">
               {[
                 {
+                  label: "WhatsApp",
+                  value: contactPhoneDisplay,
+                  sub: "Fastest way to reach us",
+                  href: whatsappUrl(),
+                  external: true,
+                },
+                {
                   label: "Phone",
-                  value: "0905 449 2490",
+                  value: contactPhoneDisplay,
                   sub: "Mon–Fri, 7AM–6PM",
+                  href: `tel:${contactPhoneE164}`,
                 },
                 {
                   label: "Email",
-                  value: "info@epraisewelding.com",
+                  value: contactEmail,
                   sub: "We reply within 24 hours",
+                  href: `mailto:${contactEmail}`,
                 },
                 {
                   label: "Hours",
-                  value: "Mon–Fri: 7AM – 6PM",
-                  sub: "Sat: 8AM – 2PM · Sun: Closed",
+                  value: contactHours.weekday,
+                  sub: `${contactHours.saturday} · ${contactHours.sunday}`,
                 },
               ].map((info, i) => (
                 <div key={i} className="contact-info-item">
                   <span className="font-kanit font-black text-xs uppercase tracking-widest text-yellow-DEFAULT block mb-1">
                     {info.label}
                   </span>
-                  <p className="font-kanit font-bold text-black text-lg">
-                    {info.value}
-                  </p>
+                  {info.href ? (
+                    <a
+                      href={info.href}
+                      target={info.external ? "_blank" : undefined}
+                      rel={info.external ? "noopener noreferrer" : undefined}
+                      className="font-kanit font-bold text-black text-lg hover:text-yellow-DEFAULT transition-colors duration-200"
+                    >
+                      {info.value}
+                    </a>
+                  ) : (
+                    <p className="font-kanit font-bold text-black text-lg">
+                      {info.value}
+                    </p>
+                  )}
                   <p className="font-kanit text-black/40 text-sm">{info.sub}</p>
                 </div>
               ))}
             </div>
+
+            <a
+              href={whatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 inline-flex items-center gap-2 bg-[#25D366] text-white font-kanit font-black text-sm uppercase tracking-widest px-6 py-4 border-2 border-black shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150"
+            >
+              Chat on WhatsApp
+            </a>
 
             {/* Emergency block */}
             <div className="mt-12 bg-black border-2 border-black p-6">
@@ -422,11 +458,16 @@ export default function ContactPage() {
               </h4>
               <p className="font-kanit text-white/70 text-sm mb-4">
                 We offer emergency welding and repair services for urgent
-                situations.
+                situations. Message us on WhatsApp for the quickest response.
               </p>
-              <span className="font-kanit font-black text-yellow-DEFAULT text-xl">
-                0905 449 2490
-              </span>
+              <a
+                href={whatsappUrl("Hello E-Praise Welding, I need emergency welding assistance.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-kanit font-black text-yellow-DEFAULT text-xl hover:underline"
+              >
+                {contactPhoneDisplay}
+              </a>
             </div>
           </div>
 
@@ -437,26 +478,31 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* MAP PLACEHOLDER */}
+      {/* WhatsApp CTA */}
       <section className="bg-black border-t-2 border-white/10">
-        <div className="relative h-64 md:h-80 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg, #fff, #fff 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 1px, transparent 40px)",
-            }}
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="w-12 h-12 bg-black border-2 border-black flex items-center justify-center mb-4">
-              <Image
-                src="/assets/logo.png"
-                alt="EPraise Welding Logo"
-                width={60}
-                height={60}
-              />
-            </div>
+        <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-16 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="reveal-on-scroll">
+            <span className="font-kanit font-semibold text-xs uppercase tracking-widest text-yellow-DEFAULT block mb-3">
+              Prefer WhatsApp?
+            </span>
+            <h2 className="font-kanit font-black text-white text-3xl md:text-4xl uppercase leading-none mb-4">
+              Message Us
+              <br />
+              <span className="text-white/60">Directly</span>
+            </h2>
+            <p className="font-kanit text-white/70 text-base max-w-md">
+              No physical shop visit needed. Send photos, measurements, or
+              project details on WhatsApp and we will reply as soon as we can.
+            </p>
           </div>
+          <a
+            href={whatsappUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="reveal-on-scroll delay-2 inline-flex items-center gap-3 bg-[#25D366] text-white font-kanit font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-black shadow-[4px_4px_0_#FFD700] hover:shadow-[2px_2px_0_#FFD700] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 whitespace-nowrap"
+          >
+            Open WhatsApp · {contactPhoneDisplay}
+          </a>
         </div>
       </section>
 

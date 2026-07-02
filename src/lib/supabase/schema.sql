@@ -102,6 +102,7 @@ create table if not exists gallery_items (
   image_path text not null,
   category text default 'Fabrication' check (category in ('Fabrication', 'Sculpture', 'Structural', 'Ornamental')),
   size text default 'medium' check (size in ('large', 'medium', 'small')),
+  orientation text default 'portrait' check (orientation in ('portrait', 'landscape')),
   order_index integer default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -148,6 +149,20 @@ insert into gallery_items (title, description, image_path, category, size, order
   ('Custom Work 20', 'Welded sculpture', 'IMG_0867.JPG.jpeg', 'Sculpture', 'small', 27),
   ('Water Tank Structure', 'Custom steel water tank support structure — engineered for load-bearing strength and weather resistance', 'Water tank structure.jpeg', 'Structural', 'large', 28)
 on conflict do nothing;
+
+-- Storage bucket for gallery uploads (public)
+insert into storage.buckets (id, name, public) values ('gallery-images', 'gallery-images', true)
+on conflict (id) do nothing;
+
+-- Storage policies for gallery-images (run after bucket exists)
+-- create policy "Public read gallery images" on storage.objects
+--   for select using (bucket_id = 'gallery-images');
+-- create policy "Admin upload gallery images" on storage.objects
+--   for insert with check (bucket_id = 'gallery-images' and exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+-- create policy "Admin update gallery images" on storage.objects
+--   for update using (bucket_id = 'gallery-images' and exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+-- create policy "Admin delete gallery images" on storage.objects
+--   for delete using (bucket_id = 'gallery-images' and exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
 
 -- Storage bucket for chat attachments
 -- Run this separately or via Supabase dashboard:

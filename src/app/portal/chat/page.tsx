@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback, Suspense } from "react
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getGalleryImageUrl } from "@/src/lib/gallery";
 import { createClient } from "@/src/lib/supabase/client";
 import type { Message, Profile } from "@/src/lib/supabase/types";
 import SignaturePad from "@/src/components/portal/SignaturePad";
@@ -552,7 +553,7 @@ function ChatContent() {
                     style={{ height: "112px" }}
                   >
                     <img
-                      src={`/assets/${item.image_path}`}
+                      src={getGalleryImageUrl(item.image_path)}
                       alt={item.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

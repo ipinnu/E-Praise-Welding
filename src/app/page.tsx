@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useRef, useState } from "react"; // useState kept for Counter component
 import Link from "next/link";
 import Image from "next/image";
@@ -283,7 +283,7 @@ export default function HomePage() {
             >
               <div className="w-8 h-0.5 bg-yellow-DEFAULT" />
               <span className="font-kanit font-semibold text-yellow-DEFAULT text-xs uppercase tracking-widest">
-                Est. 2017 · Premium Metal Works
+                Est. 2017 · Welding & Fabrication in Nigeria
               </span>
             </div>
 
@@ -319,8 +319,9 @@ export default function HomePage() {
                 animation: "slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.2s both",
               }}
             >
-              Metal welding, custom fabrication, and sculpture design that
-              transforms raw steel into lasting works of art and structure.
+              Professional welding and metal fabrication in Nigeria. Custom
+              gates, structural steel, and sculpture design that transforms raw
+              steel into lasting works of art and structure.
             </p>
 
             {/* CTAs */}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Header from "@/src/components/Header";
@@ -230,8 +230,9 @@ export default function ServicesPage() {
               animation: "slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both",
             }}
           >
-            From structural steel to ornamental sculpture — six core services
-            delivered with uncompromising craftsmanship and attention to detail.
+            From structural steel to ornamental sculpture — six core welding
+            and fabrication services across Nigeria, delivered with
+            uncompromising craftsmanship and attention to detail.
           </p>
         </div>
       </section>

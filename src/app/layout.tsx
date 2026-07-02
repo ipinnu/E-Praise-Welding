@@ -1,6 +1,14 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Kanit } from "next/font/google";
+import {
+  defaultDescription,
+  defaultKeywords,
+  organizationJsonLd,
+  siteName,
+  siteUrl,
+} from "@/src/lib/seo";
+import WhatsAppButton from "@/src/components/WhatsAppButton";
 import "../styles/tailwind.css";
 
 const kanit = Kanit({
@@ -16,15 +24,46 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "E-Praise Welding — Metal Fabrication & Sculpture Design",
-  description:
-    "E-Praise Welding delivers expert metal welding, custom fabrication, and bespoke sculpture design for contractors, architects, and homeowners across the region.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "E-Praise Welding | Welding & Metal Fabrication in Nigeria",
+    template: "%s | E-Praise Welding Nigeria",
+  },
+  description: defaultDescription,
+  keywords: defaultKeywords,
+  alternates: {
+    canonical: siteUrl,
+  },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
     ],
     apple: [{ url: "/icon-192.png" }],
+    shortcut: "/favicon.ico",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: siteUrl,
+    siteName,
+    title: "E-Praise Welding | Welding & Metal Fabrication in Nigeria",
+    description: defaultDescription,
+    images: [
+      {
+        url: "/assets/logo.png",
+        width: 1563,
+        height: 1563,
+        alt: "E-Praise Welding logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "E-Praise Welding | Welding & Metal Fabrication in Nigeria",
+    description: defaultDescription,
+    images: ["/assets/logo.png"],
   },
 };
 
@@ -34,9 +73,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en-NG">
       <body className={kanit.variable}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
         {children}
+
+        <WhatsAppButton />
 
         <script
           type="module"

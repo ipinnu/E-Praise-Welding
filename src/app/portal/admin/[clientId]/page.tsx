@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/client";
+import { getGalleryImageUrl } from "@/src/lib/gallery";
 import type { Message, Profile } from "@/src/lib/supabase/types";
 
 interface GalleryItem {
@@ -28,7 +29,7 @@ export default function AdminThreadPage() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
-  const [quoteLines, setQuoteLines] = useState([{ description: "", amount: "" }]);
+  const [quoteLines, setQuoteLines] = useState([{ description: "", quantity: "", amount: "" }]);
   const [quoteNote, setQuoteNote] = useState("");
   const [sendingQuote, setSendingQuote] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -200,9 +201,23 @@ export default function AdminThreadPage() {
 
     setSendingQuote(true);
 
-    const total = validLines.reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
+    const lineTotal = (l: { quantity: string; amount: string }) => {
+      const price = parseFloat(l.amount) || 0;
+      const qty = parseFloat(l.quantity);
+      if (!price) return 0;
+      return qty > 0 ? qty * price : price;
+    };
+
+    const total = validLines.reduce((sum, l) => sum + lineTotal(l), 0);
     const lineText = validLines
-      .map((l) => `• ${l.description}${l.amount ? ` — ₦${parseFloat(l.amount).toLocaleString()}` : ""}`)
+      .map((l) => {
+        const qty = parseFloat(l.quantity);
+        const totalForLine = lineTotal(l);
+        let text = `• ${l.description}`;
+        if (qty > 0) text += ` × ${qty}`;
+        if (totalForLine > 0) text += ` — ₦${totalForLine.toLocaleString()}`;
+        return text;
+      })
       .join("\n");
     const content = [
       quoteNote.trim() ? quoteNote.trim() : null,
@@ -240,7 +255,7 @@ export default function AdminThreadPage() {
     }
 
     setShowQuoteForm(false);
-    setQuoteLines([{ description: "", amount: "" }]);
+    setQuoteLines([{ description: "", quantity: "", amount: "" }]);
     setQuoteNote("");
     setSendingQuote(false);
   }
@@ -456,12 +471,24 @@ export default function AdminThreadPage() {
               value={quoteNote}
               onChange={(e) => setQuoteNote(e.target.value)}
               placeholder="Opening note (optional) — e.g. 'Here is your quote for the custom gate project…'"
-              rows={2}
-              className="w-full border-2 border-black px-3 py-2 font-kanit text-sm resize-none focus:outline-none focus:border-yellow-DEFAULT transition-colors mb-3 placeholder:text-black/30"
+              rows={6}
+              className="w-full min-h-[9rem] border-2 border-black px-3 py-2 font-kanit text-sm resize-y focus:outline-none focus:border-yellow-DEFAULT transition-colors mb-3 placeholder:text-black/30"
             />
 
             {/* Line items */}
             <div className="flex flex-col gap-2 mb-3">
+              <div className="flex gap-2 items-center px-0.5">
+                <span className="flex-1 font-kanit text-xs uppercase tracking-widest text-black/40">
+                  Material
+                </span>
+                <span className="w-16 font-kanit text-xs uppercase tracking-widest text-black/40 text-center">
+                  Qty
+                </span>
+                <span className="w-32 font-kanit text-xs uppercase tracking-widest text-black/40">
+                  Price
+                </span>
+                {quoteLines.length > 1 && <span className="w-8" />}
+              </div>
               {quoteLines.map((line, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <input
@@ -474,6 +501,19 @@ export default function AdminThreadPage() {
                     }}
                     placeholder={`Item ${i + 1} description`}
                     className="flex-1 border-2 border-black px-3 py-2 font-kanit text-sm focus:outline-none focus:border-yellow-DEFAULT transition-colors placeholder:text-black/30"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={line.quantity}
+                    onChange={(e) => {
+                      const updated = [...quoteLines];
+                      updated[i].quantity = e.target.value;
+                      setQuoteLines(updated);
+                    }}
+                    placeholder="Qty"
+                    className="w-16 border-2 border-black px-2 py-2 font-kanit text-sm text-center focus:outline-none focus:border-yellow-DEFAULT transition-colors placeholder:text-black/30"
                   />
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 font-kanit text-sm text-black/40">₦</span>
@@ -506,7 +546,11 @@ export default function AdminThreadPage() {
             {quoteLines.some((l) => l.amount) && (
               <div className="flex justify-end mb-3">
                 <div className="bg-black text-white font-kanit font-black text-sm px-4 py-2 border-2 border-black">
-                  Total: ₦{quoteLines.reduce((s, l) => s + (parseFloat(l.amount) || 0), 0).toLocaleString()}
+                  Total: ₦{quoteLines.reduce((s, l) => {
+                    const price = parseFloat(l.amount) || 0;
+                    const qty = parseFloat(l.quantity);
+                    return s + (price ? (qty > 0 ? qty * price : price) : 0);
+                  }, 0).toLocaleString()}
                 </div>
               </div>
             )}
@@ -514,7 +558,7 @@ export default function AdminThreadPage() {
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setQuoteLines([...quoteLines, { description: "", amount: "" }])}
+                onClick={() => setQuoteLines([...quoteLines, { description: "", quantity: "", amount: "" }])}
                 className="font-kanit font-bold text-xs uppercase tracking-widest text-black/40 hover:text-black border-b border-black/20 hover:border-black transition-all duration-150"
               >
                 + Add Line
@@ -636,7 +680,7 @@ export default function AdminThreadPage() {
                     style={{ height: "112px" }}
                   >
                     <img
-                      src={`/assets/${item.image_path}`}
+                      src={getGalleryImageUrl(item.image_path)}
                       alt={item.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

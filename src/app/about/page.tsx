@@ -171,7 +171,7 @@ export default function AboutPage() {
               </p>
               <p className="font-kanit text-black/70 text-base leading-relaxed">
                 Today, we operate a fully equipped facility serving contractors,
-                architects, homeowners, and artists across the region.
+                architects, homeowners, and artists across Nigeria.
               </p>
               <p className="font-kanit text-black/70 text-base leading-relaxed">
                 Every project — from a simple repair to a monumental sculpture —

@@ -1,6 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  contactEmail,
+  contactHours,
+  contactPhoneDisplay,
+  contactPhoneE164,
+  whatsappUrl,
+} from "@/src/lib/contact";
 
 const footerLinks = [
   { label: "Home", href: "/" },
@@ -38,7 +45,7 @@ export default function Footer() {
             </Link>
             <p className="font-kanit text-black/50 text-sm leading-relaxed max-w-xs">
               Expert metal welding, custom fabrication, and bespoke sculpture
-              design. Built to last. Crafted to impress.
+              design in Nigeria. Built to last. Crafted to impress.
             </p>
           </div>
 
@@ -68,21 +75,44 @@ export default function Footer() {
             <div className="flex flex-col gap-3">
               <p className="font-kanit text-sm text-black/60">
                 <span className="text-black/30 text-xs uppercase tracking-widest block mb-1">
+                  WhatsApp
+                </span>
+                <a
+                  href={whatsappUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-black hover:text-yellow-DEFAULT transition-colors duration-200"
+                >
+                  {contactPhoneDisplay}
+                </a>
+              </p>
+              <p className="font-kanit text-sm text-black/60">
+                <span className="text-black/30 text-xs uppercase tracking-widest block mb-1">
                   Phone
                 </span>
-                0905 449 2490
+                <a
+                  href={`tel:${contactPhoneE164}`}
+                  className="font-bold text-black hover:text-yellow-DEFAULT transition-colors duration-200"
+                >
+                  {contactPhoneDisplay}
+                </a>
               </p>
               <p className="font-kanit text-sm text-black/60">
                 <span className="text-black/30 text-xs uppercase tracking-widest block mb-1">
                   Email
                 </span>
-                info@epraisewelding.com
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="font-bold text-black hover:text-yellow-DEFAULT transition-colors duration-200 break-all"
+                >
+                  {contactEmail}
+                </a>
               </p>
               <p className="font-kanit text-sm text-black/60">
                 <span className="text-black/30 text-xs uppercase tracking-widest block mb-1">
                   Hours
                 </span>
-                Mon–Fri: 7AM – 6PM
+                {contactHours.weekday}
               </p>
             </div>
           </div>
